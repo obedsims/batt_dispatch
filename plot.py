@@ -1,10 +1,9 @@
-"""Plotting functions"""
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
 def plot_dispatch(pv, demand, E, week=30):
-    """ Visualize dispatch algorithm for a specific week
+    """
     Parameters:
         demand (pd.Series): demand production
         pv (pd.Series): pv production
