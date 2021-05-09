@@ -91,7 +91,7 @@ def print_min_cost_analysis(pv, demand, param, E):
 
     col1.write('**Total yearly consumption:** {:,.0f} kWh'.format(TotalLoad))
     col1.write('**Total PV production:** {:,.0f} kWh'.format(TotalPV))
-    col1.write('**Total fed to the grid:** {:,.0f} kWh'.format(TotalToGrid))
+    #col1.write('**Total fed to the grid:** {:,.0f} kWh'.format(TotalToGrid))
     col1.write('**Total yearly electricity cost:** £ {:,.2f}'.format(cost))
     col2.write('**Total Energy provided by the battery:** {:,.0f} kWh'.format(TotalBatteryGeneration))
     col2.write('**Average Charging/Discharging depth:** {:.03f}'.format(AverageDepth))
