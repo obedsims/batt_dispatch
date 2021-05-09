@@ -1,9 +1,9 @@
 from __future__ import division
 import streamlit as st
 import pandas as pd
-plot import plot_dispatch, plot_min_cost_dispatch
-dispatch import dispatch_max_sc, dispatch_max_sc_grid_pf, dispatch_min_costs
-analysis import print_analysis, print_min_cost_analysis
+from plot import plot_dispatch, plot_min_cost_dispatch
+from dispatch import dispatch_max_sc, dispatch_max_sc_grid_pf, dispatch_min_costs
+from analysis import print_analysis, print_min_cost_analysis
 import time
 
 st.set_page_config(layout="wide")
