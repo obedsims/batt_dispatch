@@ -1,9 +1,9 @@
 from __future__ import division
 import streamlit as st
 import pandas as pd
-from Battery.plot import plot_dispatch, plot_min_cost_dispatch
-from Battery.dispatch import dispatch_max_sc, dispatch_max_sc_grid_pf, dispatch_min_costs
-from Battery.analysis import print_analysis, print_min_cost_analysis
+plot import plot_dispatch, plot_min_cost_dispatch
+dispatch import dispatch_max_sc, dispatch_max_sc_grid_pf, dispatch_min_costs
+analysis import print_analysis, print_min_cost_analysis
 import time
 
 st.set_page_config(layout="wide")
