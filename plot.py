@@ -48,7 +48,7 @@ def plot_dispatch(pv, demand, E, week=30):
 
     ax[2].fill_between(inv2grid.index, 0, inv2grid, color='green', alpha=.2)
     ax[2].fill_between(inv2grid.index, 0, -grid2load, color='red', alpha=.2)
-    ax[2].set_ylabel('In/out from grid (kW)')
+    ax[2].set_ylabel('In/out from grid (kWh)')
     ax[0].legend(loc='best')
     st.pyplot(fig=f)
     return
