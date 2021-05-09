@@ -38,8 +38,8 @@ cost_to_buy = st.sidebar.number_input('Enter the Price to Buy Electricity (p/kWh
 price_to_sell = st.sidebar.number_input('Enter the Price to Sell Electricity (p/kWh)', value=8, min_value=0)
 
 # Data to be used for calculations
-demand = pd.read_csv('/Users/osims/PycharmProjects/SolarProject/Battery/demand_example.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
-pv_1kW = pd.read_csv('/Users/osims/PycharmProjects/SolarProject/Battery/pv_example.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
+demand = pd.read_csv('batt_dispatch/demand.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
+pv_1kW = pd.read_csv('batt_dispatch/pv.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
 
 # PV parameters
 pv = pv_1kW * pv_size
