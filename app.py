@@ -93,7 +93,7 @@ with st.beta_expander("Tell Me More (LP Model)"):
     - In order to properly assess the financial impact of different batteries, we need to decide on how the battery will
       be controlled. The controller could be a simple reactive one or we could do more sophisticated model predictive control.
       To keep things simple, it is assumed that the battery controller has access to perfect knowledge about what will 
-      happen in the house.
+      happen in the building.
     - We must initially define the variables that we are going to optimise. In this model they are the **battery state (kWh)**, 
     **battery charge (kW)** and **battery discharge (kW)**, the **total house power (kW)** and **power cost (pence)**.
     """)
