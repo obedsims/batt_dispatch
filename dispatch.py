@@ -1,7 +1,3 @@
-""" Dispatch algorithms
-All algorithms should have the same arguments and return all energy flows as a
-dict of ndarrays
-"""
 from __future__ import division
 import numpy as np
 import pandas as pd
@@ -279,7 +275,7 @@ def dispatch_min_costs(pv, demand, param, return_series=False):
         prb += total_power[i] == charge[i] - discharge[i] + pload[i] - ppv[i]  # total power (kW)
         prb += cost_power[i] >= timestep * cost_buy * total_power[i]           # power cost constraint
         prb += cost_power[i] >= timestep * price_sell * total_power[i]         # power cost constraint
-        prb += LevelofCharge[i] <= bat_size_e_adj                                # battery capacity
+        prb += LevelofCharge[i] <= bat_size_e_adj                              # battery capacity
         prb += charge[i] <= bat_size_p_adj
         prb += discharge[i] <= bat_size_p_adj
 
