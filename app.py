@@ -27,15 +27,15 @@ dispatch_method = st.sidebar.selectbox("Select Dispatch Method",
                                        ["Maximise Self Consumption", "Peak Shave", "Minimise Costs (LP Optimisation)"])
 week = st.sidebar.slider(label="Select the week of data you want to view:",
                          min_value=1, max_value=52, value=20, format='Week %d')
-st.sidebar.title(" Solar PV Size Parameter")
+st.sidebar.markdown("**Solar PV Size Parameter**")
 pv_size = st.sidebar.number_input('Enter the Nominal Solar PV Power (kW)', value=10, min_value=0)
-st.sidebar.markdown("Battery Parameters")
+st.sidebar.markdown("**Battery Parameters**")
 batt_capacity = st.sidebar.number_input('Enter the Battery Capacity (kWh)', value=40, min_value=0)
 batt_eff = st.sidebar.number_input('Enter the Battery Efficiency', value=0.90)
 max_power = st.sidebar.number_input('Enter the Maximum Battery Power (kW)', value=20, min_value=0)
 inv_eff = st.sidebar.number_input('Enter the Inverter Efficiency', value=0.85)
 #init_charge = st.sidebar.number_input('Enter the Initial Battery Charge', value=20)
-st.sidebar.markdown("Price Parameters")
+st.sidebar.markdown("**Tariff Parameters**")
 cost_to_buy = st.sidebar.number_input('Enter the Price to Buy Electricity (p/kWh)', value=18, min_value=0)
 price_to_sell = st.sidebar.number_input('Enter the Price to Sell Electricity (p/kWh)', value=8, min_value=0)
 
