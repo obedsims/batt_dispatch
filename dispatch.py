@@ -2,6 +2,114 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 
+def dispatch_min_costs(pv, demand, param, return_series=False):
+    """
+    Battery dispatch algorithm.
+    The dispatch of the storage capacity is optimised in such a way to minimize the costs through maximising the profit
+    generated selling electricity and minimize costs of electricity purchase from the grid.
+    :param return_series:
+    :param pv: Vector of PV generation, in kW DC (i.e. before the inverter)
+    :param demand: Vector of household consumption, kW
+    :param param: Dictionary with the simulation parameters:
+                    timestep: Simulation time step (in hours)
+                    BatteryCapacity: Available battery capacity (i.e. only the the available DOD), kWh
+                    BatteryEfficiency: Battery round-trip efficiency, -
+                    InverterEfficiency: Inverter efficiency, -
+                    MaxPower: Maximum battery charging or discharging powers (assumed to be equal), kW
+                    Cost_to_buy: Cost to buy electricity from the grid (p)
+                    Price_to_sell: Price to sell electricity back to the grid (p)
+    :return: Dictionary of Time series
+    """
+    # Parameters
+    bat_size_e_adj = param['BatteryCapacity']   # battery capacity (kWh)
+    bat_size_p_adj = param['MaxPower']      # Maximum battery power (kW)
+    n_bat = param['BatteryEfficiency']      # battery efficiency
+    n_inv = param['InverterEfficiency']     # inverter efficiency
+    timestep = param['timestep']
+    init_charge = param['InitialCharge']
+    cost_buy = param['Cost_to_buy']         # buy price (p/kWh)
+    price_sell = param['Price_to_sell']     # sell price (p/kWh) formulation works only when sell <= buy
+
+    Nsteps = len(pv)  # number of time steps
+    assert (len(demand) == len(pv))
+
+    from pulp import LpVariable, LpProblem, LpStatus, lpSum, value
+
+    # Power profiles
+    pload = demand.to_numpy()   # household background load (kW)
+    ppv = pv.to_numpy()         # PV generation (kW)
+    res_pv = np.maximum(pv - demand / n_inv, 0)  # DC
+
+    # Battery parameters
+    eff = n_bat * n_inv  # combined battery and inverter efficiency
+
+    # Battery variables
+    LevelofCharge = [LpVariable('E_{}'.format(i), 0, None) for i in range(Nsteps)]  # battery energy (kWh)
+    charge = [LpVariable('pc_{}'.format(i), 0, None) for i in range(Nsteps)]  # battery charge (kW)
+    discharge = [LpVariable('pd_{}'.format(i), 0, None) for i in range(Nsteps)]  # battery discharge (kW)
+
+    # Auxiliary variables
+    total_power = [LpVariable('p_{}'.format(i), None, None) for i in range(Nsteps)]  # total house power (kW)
+    cost_power = [LpVariable('cpow_{}'.format(i), None, None) for i in range(Nsteps)]  # power cost (p)
+
+    # Optimisation problem
+    prb = LpProblem('Battery Operation')
+
+    # Objective
+    prb += lpSum(cost_power)   # sum of electricity costs - sum of revenue gen
+    # Constraints
+    for i in range(Nsteps):
+        prb += total_power[i] == charge[i] - discharge[i] + pload[i] - ppv[i]  # total power (kW)
+        prb += cost_power[i] >= timestep * cost_buy * total_power[i]           # power cost constraint
+        prb += cost_power[i] >= timestep * price_sell * total_power[i]         # power cost constraint
+        prb += LevelofCharge[i] <= bat_size_e_adj                              # battery capacity
+        prb += charge[i] <= bat_size_p_adj
+        prb += discharge[i] <= bat_size_p_adj
+
+    # Battery charge state constraints
+    # Batteries must finish half charged
+    prb += LevelofCharge[0] == init_charge  # starting energy
+    prb += LevelofCharge[Nsteps - 1] == init_charge  # finishing energy
+    for i in range(1, Nsteps):
+        prb += LevelofCharge[i] == LevelofCharge[i - 1] + timestep * (eff * charge[i] - discharge[i])  # battery transitions
+
+    # Solve problem
+    prb.solve()
+
+    optimal_sln = value(prb.objective)
+    print('Status {}'.format(LpStatus[prb.status]))
+    print('Cost {}'.format(optimal_sln))
+
+    charge_plot = []
+    discharge_plot = []
+    total_power_plot = []
+    LevelofCharge_plot = []
+    cost_plot = []
+    for i in charge:
+        charge_plot.append(value(i))
+    for i in discharge:
+        discharge_plot.append(value(i))
+    for i in total_power:
+        total_power_plot.append(value(i))
+    for i in LevelofCharge:
+        LevelofCharge_plot.append(value(i))
+    for i in cost_power:
+        cost_plot.append(value(i))
+
+    out = {'charge': charge_plot,
+           'discharge': discharge_plot,
+           'total_power': total_power_plot,
+           'LevelofCharge': LevelofCharge_plot,
+           'cost': cost_plot
+           # 'grid2store': grid2store
+           }
+    if not return_series:
+        out_pd = {}
+        for k, v in out.items():  # Create dictionary of pandas series with same index as the input pv
+            out_pd[k] = pd.Series(v, index=pv.index)
+        out = out_pd
+    return out
+
 
 def dispatch_max_sc(pv, demand, param, return_series=False):
     """ Self consumption maximization pv + battery dispatch algorithm.
@@ -214,112 +322,4 @@ def dispatch_max_sc_grid_pf(pv, demand, param_tech, return_series=False):
         out = out_pd
     return out
 
-
-def dispatch_min_costs(pv, demand, param, return_series=False):
-    """
-    Battery dispatch algorithm.
-    The dispatch of the storage capacity is optimised in such a way to minimize the costs through maximising the profit
-    generated selling electricity and minimize costs of electricity purchase from the grid.
-    :param return_series:
-    :param pv: Vector of PV generation, in kW DC (i.e. before the inverter)
-    :param demand: Vector of household consumption, kW
-    :param param: Dictionary with the simulation parameters:
-                    timestep: Simulation time step (in hours)
-                    BatteryCapacity: Available battery capacity (i.e. only the the available DOD), kWh
-                    BatteryEfficiency: Battery round-trip efficiency, -
-                    InverterEfficiency: Inverter efficiency, -
-                    MaxPower: Maximum battery charging or discharging powers (assumed to be equal), kW
-                    Cost_to_buy: Cost to buy electricity from the grid (p)
-                    Price_to_sell: Price to sell electricity back to the grid (p)
-    :return: Dictionary of Time series
-    """
-    # Parameters
-    bat_size_e_adj = param['BatteryCapacity']   # battery capacity (kWh)
-    bat_size_p_adj = param['MaxPower']      # Maximum battery power (kW)
-    n_bat = param['BatteryEfficiency']      # battery efficiency
-    n_inv = param['InverterEfficiency']     # inverter efficiency
-    timestep = param['timestep']
-    init_charge = param['InitialCharge']
-    cost_buy = param['Cost_to_buy']         # buy price (p/kWh)
-    price_sell = param['Price_to_sell']     # sell price (p/kWh) formulation works only when sell <= buy
-
-    Nsteps = len(pv)  # number of time steps
-    assert (len(demand) == len(pv))
-
-    from pulp import LpVariable, LpProblem, LpStatus, lpSum, value
-
-    # Power profiles
-    pload = demand.to_numpy()   # household background load (kW)
-    ppv = pv.to_numpy()         # PV generation (kW)
-    res_pv = np.maximum(pv - demand / n_inv, 0)  # DC
-
-    # Battery parameters
-    eff = n_bat * n_inv  # combined battery and inverter efficiency
-
-    # Battery variables
-    LevelofCharge = [LpVariable('E_{}'.format(i), 0, None) for i in range(Nsteps)]  # battery energy (kWh)
-    charge = [LpVariable('pc_{}'.format(i), 0, None) for i in range(Nsteps)]  # battery charge (kW)
-    discharge = [LpVariable('pd_{}'.format(i), 0, None) for i in range(Nsteps)]  # battery discharge (kW)
-
-    # Auxiliary variables
-    total_power = [LpVariable('p_{}'.format(i), None, None) for i in range(Nsteps)]  # total house power (kW)
-    cost_power = [LpVariable('cpow_{}'.format(i), None, None) for i in range(Nsteps)]  # power cost (p)
-
-    # Optimisation problem
-    prb = LpProblem('Battery Operation')
-
-    # Objective
-    prb += lpSum(cost_power)   # sum of electricity costs - sum of revenue gen
-    # Constraints
-    for i in range(Nsteps):
-        prb += total_power[i] == charge[i] - discharge[i] + pload[i] - ppv[i]  # total power (kW)
-        prb += cost_power[i] >= timestep * cost_buy * total_power[i]           # power cost constraint
-        prb += cost_power[i] >= timestep * price_sell * total_power[i]         # power cost constraint
-        prb += LevelofCharge[i] <= bat_size_e_adj                              # battery capacity
-        prb += charge[i] <= bat_size_p_adj
-        prb += discharge[i] <= bat_size_p_adj
-
-    # Battery charge state constraints
-    # Batteries must finish half charged
-    prb += LevelofCharge[0] == init_charge  # starting energy
-    prb += LevelofCharge[Nsteps - 1] == init_charge  # finishing energy
-    for i in range(1, Nsteps):
-        prb += LevelofCharge[i] == LevelofCharge[i - 1] + timestep * (eff * charge[i] - discharge[i])  # battery transitions
-
-    # Solve problem
-    prb.solve()
-
-    optimal_sln = value(prb.objective)
-    print('Status {}'.format(LpStatus[prb.status]))
-    print('Cost {}'.format(optimal_sln))
-
-    charge_plot = []
-    discharge_plot = []
-    total_power_plot = []
-    LevelofCharge_plot = []
-    cost_plot = []
-    for i in charge:
-        charge_plot.append(value(i))
-    for i in discharge:
-        discharge_plot.append(value(i))
-    for i in total_power:
-        total_power_plot.append(value(i))
-    for i in LevelofCharge:
-        LevelofCharge_plot.append(value(i))
-    for i in cost_power:
-        cost_plot.append(value(i))
-
-    out = {'charge': charge_plot,
-           'discharge': discharge_plot,
-           'total_power': total_power_plot,
-           'LevelofCharge': LevelofCharge_plot,
-           'cost': cost_plot
-           # 'grid2store': grid2store
-           }
-    if not return_series:
-        out_pd = {}
-        for k, v in out.items():  # Create dictionary of pandas series with same index as the input pv
-            out_pd[k] = pd.Series(v, index=pv.index)
-        out = out_pd
-    return out
 
