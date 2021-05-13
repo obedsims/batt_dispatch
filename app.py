@@ -102,7 +102,7 @@ with st.beta_expander("Tell Me More (LP Model)"):
 
     st.latex(
         """
-        levelofcharge_t, \:charge_t, \:discharge_t, \:totalpower_t, \:costpower_t
+        levelofcharge_i, \:charge_i, \:discharge_i, \:totalpower_i, \:costpower_i
         """
     )
     st.markdown(
@@ -128,7 +128,7 @@ with st.beta_expander("Tell Me More (LP Model)"):
         """)
 
     st.latex(r"""
-    min\:\sum_{t}^{Nsteps} costpower_t
+    min\:\sum_{i}^{Nsteps} costpower_i
     """)
 
     st.markdown(r"""
@@ -159,7 +159,7 @@ with st.beta_expander("Tell Me More (LP Model)"):
         """)
 
     st.latex(r"""
-    min\:\sum_{t}^{Nsteps} costpower_t + costperkWh \cdot max\:battery\:capacity
+    min\:\sum_{i}^{Nsteps} costpower_i + costperkWh \cdot max\:battery\:capacity
     """)
 
     st.image('./data/battsizeopt.png')
