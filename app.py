@@ -66,8 +66,6 @@ if dispatch_method == "Peak Shave":
     plot_dispatch(pv, demand, E1, week=week)
     print_analysis(pv, demand, param_tech, E1)
 if dispatch_method == "Minimise Costs (LP Optimisation)":
-    with st.spinner(text='Optimising...this may take about a minute'):
-        time.sleep(65)
     E1 = dispatch_min_costs(pv, demand, param_tech, return_series=False)
     plot_min_cost_dispatch(pv, demand, E1, week=week)
     print_min_cost_analysis(pv, demand, param_tech, E1)
