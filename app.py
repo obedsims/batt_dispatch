@@ -153,7 +153,7 @@ with st.beta_expander("Tell Me More (LP Model)"):
     """)
             
     st.markdown(r"""
-    We can go further and set the battery size ($max battery capacity$) to a variable. Then add to the 
+    We can go further and change the battery size ($max\:battery\:capacity$) to a variable. Then add to the 
     objective function a term which considers the capital cost of the battery based on its $kWh$ output,
     shown below.
         """)
@@ -171,7 +171,4 @@ st.sidebar.info(
         "uses Streamlit to create a battery dispatch app.\n\n"
         "Check the code at ([@obedsims](https://github.com/obedsims/batt_dispatch))"
 )
-
-
-
 
