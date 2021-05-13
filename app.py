@@ -159,7 +159,7 @@ with st.beta_expander("Tell Me More (LP Model)"):
         """)
 
     st.latex(r"""
-    min\:\sum_{i}^{Nsteps} costpower_i + costperkWh \cdot max\:battery\:capacity
+    min\:\sum_{i}^{Nsteps} (costpower_i + batt\:cost\:per\:kWh \cdot max\:battery\:capacity)
     """)
 
     st.image('./data/battsizeopt.png')
