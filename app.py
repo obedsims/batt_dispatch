@@ -151,6 +151,13 @@ with st.beta_expander("Tell Me More (LP Model)"):
     plus the change in $charge$ and $discharge$ at the current timestep. The level of charge at the start of the 
     period is equal to $initialcharge$ and this is equal to the state of the battery at the end of the time period.
     """)
+                   
+st.sidebar.title("About")
+st.sidebar.info(
+        "This page \n"
+        "uses Streamlit to create a battery dispatch app.\n\n"
+        "Check the code at ([@obedsims](https://github.com/obedsims/batt_dispatch))"
+)
 
 
 
