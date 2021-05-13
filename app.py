@@ -40,8 +40,15 @@ cost_to_buy = st.sidebar.number_input('Enter the Price to Buy Electricity (p/kWh
 price_to_sell = st.sidebar.number_input('Enter the Price to Sell Electricity (p/kWh)', value=8, min_value=0)
 
 # Data to be used for calculations
-demand = pd.read_csv('data/demand.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
-pv_1kW = pd.read_csv('data/pv.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
+@st.cache
+def load_data():
+            demand = pd.read_csv('data/demand.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
+            pv_1kW = pd.read_csv('data/pv.csv', index_col=0, header=None, parse_dates=True, squeeze=True)
+            return demand, pv_1kW
+
+_, pv_1kW = load_data()
+demand, _ = load_data()
+
 
 # PV parameters
 pv = pv_1kW * pv_size
