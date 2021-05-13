@@ -151,7 +151,20 @@ with st.beta_expander("Tell Me More (LP Model)"):
     plus the change in $charge$ and $discharge$ at the current timestep. The level of charge at the start of the 
     period is equal to $initialcharge$ and this is equal to the state of the battery at the end of the time period.
     """)
+            
+    st.markdown(r"""
+    We can go further and set the battery size ($max battery capacity$) to a variable. Then add to the 
+    objective function a term which considers the capital cost of the battery based on its $kWh$ output,
+    shown below.
+        """)
+
+    st.latex(r"""
+    min\:\sum_{t}^{Nsteps} costpower_t + costperkWh \cdot max\:battery\:capacity
+    """)
+
+    st.image('./data/battsizeopt.png')
                    
+            
 st.sidebar.title("About")
 st.sidebar.info(
         "This page \n"
